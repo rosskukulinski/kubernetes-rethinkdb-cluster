@@ -18,7 +18,7 @@ spec:
         instance: three
     spec:
       containers:
-      - image: rosskukulinski/rethinkdb-kube
+      - image: rosskukulinski/rethinkdb-kubernetes:2.2.5
         command:
           - "/usr/bin/run.sh"
           - "--server-name"

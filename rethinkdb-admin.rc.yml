@@ -16,7 +16,7 @@ spec:
         role: admin
     spec:
       containers:
-      - image: rosskukulinski/rethinkdb-kube
+      - image: rosskukulinski/rethinkdb-kubernetes:2.2.5
         imagePullPolicy: Always
         name: rethinkdb
         env:
