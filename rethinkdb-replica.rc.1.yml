@@ -1,0 +1,47 @@
+apiVersion: v1
+kind: ReplicationController
+metadata:
+  labels:
+    db: rethinkdb
+  name: rethinkdb-replica-1
+spec:
+  replicas: 1
+  selector:
+    db: rethinkdb
+    role: replica
+    instance: one
+  template:
+    metadata:
+      labels:
+        db: rethinkdb
+        role: replica
+        instance: one
+    spec:
+      containers:
+      - image: rosskukulinski/rethinkdb-kube
+        command:
+          - "/usr/bin/run.sh"
+          - "--server-name"
+          - "replica_1"
+        imagePullPolicy: Always
+        name: rethinkdb
+        env:
+        - name: POD_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        ports:
+        - containerPort: 8080
+          name: admin-port
+        - containerPort: 28015
+          name: driver-port
+        - containerPort: 29015
+          name: cluster-port
+        volumeMounts:
+        - mountPath: /data
+          name: rethinkdb-storage
+      volumes:
+      - gcePersistentDisk:
+          fsType: ext4
+          pdName: rethinkdb-storage-1
+        name: rethinkdb-storage
