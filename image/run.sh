@@ -46,6 +46,10 @@ if [[ -n "${IP}" ]]; then
     exec rethinkdb --canonical-address ${MYHOST} --bind all  --join ${ENDPOINT} "${@}" # pass in other arguments
   fi
 else
+  if [[ -n "${PROXY}" ]]; then
+    echo "Cannot start in proxy mode, no ENDPOINT available"
+    exit 1
+  fi
   echo "Start single instance"
   echo rethinkdb --canonical-address ${MYHOST} --bind all "${@}"
   exec rethinkdb --canonical-address ${MYHOST} --bind all "${@}"
