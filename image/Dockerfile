@@ -1,4 +1,4 @@
-FROM rethinkdb:2.2.6
+FROM rethinkdb:2.3.0
 
 MAINTAINER Ross Kukulinski <ross@kukulinski.com>
 
