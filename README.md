@@ -1,8 +1,8 @@
 # Simple RethinkDB Cluster for Kubernetes
 
-This is based on the original work in [github.com/kubernetes/kubernetes](https://github.com/kubernetes/kubernetes/tree/master/examples/rethinkdb), but has been adapted to utilize a newer version of RethinkDB (2.2.5) and to support proxies.
+This is based on the original work in [github.com/kubernetes/kubernetes](https://github.com/kubernetes/kubernetes/tree/master/examples/rethinkdb), but has been adapted to utilize a newer version of RethinkDB (2.3.1) and to support proxies.
 
-Docker Automated Build: rosskukulinski/rethinkdb-kubernetes:2.2.5
+Docker Automated Build: rosskukulinski/rethinkdb-kubernetes:2.3.1
 https://hub.docker.com/r/rosskukulinski/rethinkdb-kubernetes
 
 
