@@ -23,8 +23,8 @@ if [[ -n "${KUBERNETES_SERVICE_HOST}" ]]; then
   POD_NAMESPACE=${POD_NAMESPACE:-default}
   MYHOST=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1  -d'/')
   echo My host: ${MYHOST}
-
-  URL="https://${KUBERNETES_SERVICE_HOST}:${KUBERNETES_SERVICE_PORT}/api/v1/namespaces/${POD_NAMESPACE}/endpoints/rethinkdb-cluster"
+  RETHINK_CLUSTER=${RETHINK_CLUSTER:-"rethinkdb-cluster"}
+  URL="https://${KUBERNETES_SERVICE_HOST}:${KUBERNETES_SERVICE_PORT}/api/v1/namespaces/${POD_NAMESPACE}/endpoints/${RETHINK_CLUSTER}"
   echo "Endpont url: ${URL}"
   echo "Looking for IPs..."
   token=$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)
