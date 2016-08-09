@@ -1,6 +1,6 @@
 # RethinkDB Cluster for Kubernetes
 
-MIT Licensed by Ross Kukulinski <ross@kukulinski.com>
+MIT Licensed by Ross Kukulinski [@RossKukulinski](https://twitter.com/rosskukulinski)
 
 ## Overview
 
