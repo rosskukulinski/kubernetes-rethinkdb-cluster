@@ -1,28 +1,51 @@
-# Simple RethinkDB Cluster for Kubernetes
+# RethinkDB Cluster for Kubernetes
 
-This is based on the original work in [github.com/kubernetes/kubernetes](https://github.com/kubernetes/kubernetes/tree/master/examples/rethinkdb), but has been adapted to utilize a newer version of RethinkDB (2.3.1) and to support proxies.
+MIT Licensed by Ross Kukulinski <ross@kukulinski.com>
 
-Docker Automated Build: rosskukulinski/rethinkdb-kubernetes:2.3.1
+## Overview
+
+This repository contains Kubernetes configurations to easily deploy RethinkDB.
+The quickstart provides a non-persistent disk configuration for development
+and testing.  There is also a GKE / GCE configuration which supports
+persistent volume backed replicas.
+
+By default, all RethinkDB Replicas are configured with Resource Limits and Requests for:
+
+* 256Mi memory
+* 100m cpu
+
+In addition, RethinkDB Replicas are configured with a 100Mi cache-size.  All
+of these settings can be tuned for your specific needs.
+
+## Background
+This is based on the original work in [github.com/kubernetes/kubernetes](https://github.com/kubernetes/kubernetes/tree/master/examples/rethinkdb), but has been adapted to utilize newer versions of RethinkDB (2.3+) as well as supporting proxies.
+
+Docker Automated Build: rosskukulinski/rethinkdb-kubernetes:2.3.4
 https://hub.docker.com/r/rosskukulinski/rethinkdb-kubernetes
 
-
-It's important to note that the admin interface IS exposed via public LoadBalancer.  This is for demonstration purposes only.  I would recommend changing the admin service to ```type: ClusterIP``` and use an SSL & password protected proxy (like Nginx) to publicly expose the admin interface.
+It's important to note that the default admin interface IS exposed via public LoadBalancer.  This is for demonstration purposes only.  I would recommend changing the admin service to ```type: ClusterIP``` and use a TLS & password protected proxy (like nginx) to publicly expose the admin interface.
 
 ## Quickstart without persistent storage
 
+Launch Services and Deployments
+
 ```
-kubectl create -f driver.svc.yml
-kubectl create -f cluster.svc.yml
-kubectl create -f admin.svc.yml
-kubectl create -f rethinkdb-replica.rc.yml
-# Wait for first replica to come up
-sleep 30
-kubectl scale rc rethinkdb-replica --replicas=3
-kubectl create -f rethinkdb-proxy.rc.yml
-kubectl create -f rethinkdb-admin.rc.yml
+kubectl create -f quickstart.yml
 ```
 
-## Quickstart with persistent storage (recommended)
+Once Rethinkdb pods are running, access the Admin service
+
+```
+kubectl describe service rethinkdb-admin
+```
+
+Scale up the number of Rethinkdb replicas
+
+```
+kubectl scale deployment/rethinkdb-replica --replics=5
+```
+
+## GKE/GCE Configuration with persistent storage (recommended)
 
 Due to the way persistent volumes are handled in Kubernetes, we have to have one RC per replica, each with its own persistent volume.  The RC is used to create a new pod should there be any issues.
 
@@ -31,14 +54,18 @@ rethinkdb-storage-1
 rethinkdb-storage-2
 rethinkdb-storage-3
 
+
+Create the RethinkDB Services and first replica
+
 ```
-kubectl create -f driver.svc.yml
-kubectl create -f cluster.svc.yml
-kubectl create -f admin.svc.yml
-kubectl create -f rethinkdb-replica.rc.1.yml
-# Wait for first replica to come up
-kubectl create -f rethinkdb-replica.rc.2.yml
-kubectl create -f rethinkdb-replica.rc.3.yml
-kubectl create -f rethinkdb-proxy.rc.yml
-kubectl create -f rethinkdb-admin.rc.yml
+kubectl create -f rethinkdb-services.yml
+kubectl create -f rethinkdb-replica.1.yml
+```
+Wait for first replica to come up before launching the other replicas
+
+```
+kubectl create -f rethinkdb-replica.2.yml
+kubectl create -f rethinkdb-replica.3.yml
+kubectl create -f rethinkdb-proxy.yml
+kubectl create -f rethinkdb-admin.yml
 ```

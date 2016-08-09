@@ -1,28 +1,30 @@
-apiVersion: v1
-kind: ReplicationController
+apiVersion: extensions/v1beta1
+kind: Deployment
 metadata:
   labels:
     db: rethinkdb
-  name: rethinkdb-replica-1
+  name: rethinkdb-replica-2
 spec:
   replicas: 1
   selector:
     db: rethinkdb
     role: replica
-    instance: one
+    instance: two
   template:
     metadata:
       labels:
         db: rethinkdb
         role: replica
-        instance: one
+        instance: two
     spec:
       containers:
-      - image: rosskukulinski/rethinkdb-kubernetes:2.2.5
+      - image: rosskukulinski/rethinkdb-kubernetes:2.3.4
         command:
           - "/usr/bin/run.sh"
           - "--server-name"
-          - "replica_1"
+          - "replica_2"
+          - "--cache-size"
+          - "256"
         imagePullPolicy: Always
         name: rethinkdb
         env:
@@ -39,11 +41,18 @@ spec:
           name: driver-port
         - containerPort: 29015
           name: cluster-port
+        resources:
+          limits:
+            cpu: 100m
+            memory: 256Mi
+          requests:
+            cpu: 100m
+            memory: 256Mi
         volumeMounts:
         - mountPath: /data
           name: rethinkdb-storage
       volumes:
       - gcePersistentDisk:
           fsType: ext4
-          pdName: rethinkdb-storage-1
+          pdName: rethinkdb-storage-2
         name: rethinkdb-storage

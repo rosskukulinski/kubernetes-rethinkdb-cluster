@@ -3,29 +3,25 @@ kind: ReplicationController
 metadata:
   labels:
     db: rethinkdb
-  name: rethinkdb-replica-2
+  name: rethinkdb-admin
 spec:
   replicas: 1
   selector:
     db: rethinkdb
-    role: replica
-    instance: two
+    role: admin
   template:
     metadata:
       labels:
         db: rethinkdb
-        role: replica
-        instance: two
+        role: admin
     spec:
       containers:
-      - image: rosskukulinski/rethinkdb-kubernetes:2.2.5
-        command:
-          - "/usr/bin/run.sh"
-          - "--server-name"
-          - "replica_2"
+      - image: rosskukulinski/rethinkdb-kubernetes:2.3.4
         imagePullPolicy: Always
         name: rethinkdb
         env:
+        - name: PROXY
+          value: "true"
         - name: POD_NAMESPACE
           valueFrom:
             fieldRef:
@@ -40,10 +36,8 @@ spec:
         - containerPort: 29015
           name: cluster-port
         volumeMounts:
-        - mountPath: /data
+        - mountPath: /data/rethinkdb_data
           name: rethinkdb-storage
       volumes:
-      - gcePersistentDisk:
-          fsType: ext4
-          pdName: rethinkdb-storage-2
-        name: rethinkdb-storage
+      - name: rethinkdb-storage
+        emptyDir: {}

@@ -3,20 +3,20 @@ kind: ReplicationController
 metadata:
   labels:
     db: rethinkdb
-  name: rethinkdb-admin
+  name: rethinkdb-proxy
 spec:
-  replicas: 1
+  replicas: 3
   selector:
     db: rethinkdb
-    role: admin
+    role: proxy
   template:
     metadata:
       labels:
         db: rethinkdb
-        role: admin
+        role: proxy
     spec:
       containers:
-      - image: rosskukulinski/rethinkdb-kubernetes:2.2.5
+      - image: rosskukulinski/rethinkdb-kubernetes:2.3.4
         imagePullPolicy: Always
         name: rethinkdb
         env:
