@@ -30,7 +30,7 @@ It's important to note that the default admin interface IS exposed via public Lo
 Launch Services and Deployments
 
 ```
-kubectl create -f quickstart.yml
+kubectl create -f rethinkdb-quickstart.yml
 ```
 
 Once Rethinkdb pods are running, access the Admin service
