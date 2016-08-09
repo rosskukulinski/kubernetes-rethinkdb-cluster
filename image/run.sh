@@ -15,6 +15,14 @@
 # limitations under the License.
 
 set -o pipefail
+
+MYHOST=""
+while [[ -z $MYHOST ]]; do
+  echo "Attempting to get canonical-address"
+  MYHOST=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1  -d'/')
+  echo "canonical-address: ${MYHOST}"
+done
+echo "Canonical Address: ${MYHOST}"
 echo "additional CLI flags ${@}"
 echo Checking for other nodes
 IP=""
@@ -24,6 +32,7 @@ if [[ -n "${KUBERNETES_SERVICE_HOST}" ]]; then
   MYHOST=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1  -d'/')
   echo My host: ${MYHOST}
   RETHINK_CLUSTER=${RETHINK_CLUSTER:-"rethinkdb-cluster"}
+  echo Namespace: ${POD_NAMESPACE}
   URL="https://${KUBERNETES_SERVICE_HOST}:${KUBERNETES_SERVICE_PORT}/api/v1/namespaces/${POD_NAMESPACE}/endpoints/${RETHINK_CLUSTER}"
   echo "Endpont url: ${URL}"
   echo "Looking for IPs..."
