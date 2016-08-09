@@ -20,9 +20,9 @@ MYHOST=""
 while [[ -z $MYHOST ]]; do
   echo "Attempting to get canonical-address"
   MYHOST=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1  -d'/')
-  echo "canonical-address: ${MYHOST}"
+  echo "Detected canonical-address: ${MYHOST}"
 done
-echo "Canonical Address: ${MYHOST}"
+echo "Final canonical-address: ${MYHOST}"
 echo "additional CLI flags ${@}"
 echo Checking for other nodes
 IP=""
