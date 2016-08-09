@@ -34,6 +34,7 @@ metadata:
     db: rethinkdb
   name: rethinkdb-driver
 spec:
+  type: LoadBalancer
   ports:
     - port: 28015
       targetPort: driver-port
