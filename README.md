@@ -48,6 +48,11 @@ Once Rethinkdb pods are running, access the Admin service
 kubectl describe service rethinkdb-admin
 ```
 
+To find the external IP to connect to, locate at the `EXTERNAL-IP` column under the `rethinkdb-driver` row after running
+```
+kubectl get service
+```
+
 Scale up the number of Rethinkdb replicas
 
 ```
