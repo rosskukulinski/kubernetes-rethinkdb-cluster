@@ -30,7 +30,7 @@ It's important to note that the default admin interface IS exposed via public Lo
 2) Set `gcloud` to your project `gcloud config set <project-name>`
 3) Create a cluster via the Console: Compute > Container Engine > Container Clusters > New container cluster. 
 Leaving all other options default - You should get a Kubernetes cluster with three nodes, ready to receive your container image.
-4) Set `gcloud` to point to your container - `gcloud container clusters get-credentials --zone europe-west1-c <cluster-name>`
+4) Set `gcloud` to point to your container - `gcloud container clusters get-credentials --zone <cluster-zone> <cluster-name>`
 
 
 
