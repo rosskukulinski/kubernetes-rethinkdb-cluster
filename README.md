@@ -54,7 +54,7 @@ Scale up the number of Rethinkdb replicas
 kubectl scale deployment/rethinkdb-replica --replicas=5
 ```
 
-Observe the pods with
+Observe your pods
 
 ```
 kubectl get pods
