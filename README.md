@@ -42,7 +42,7 @@ kubectl describe service rethinkdb-admin
 Scale up the number of Rethinkdb replicas
 
 ```
-kubectl scale deployment/rethinkdb-replica --replics=5
+kubectl scale deployment/rethinkdb-replica --replicas=5
 ```
 
 ## GKE/GCE Configuration with persistent storage (recommended)
