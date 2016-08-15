@@ -1,17 +1,19 @@
-apiVersion: extensions/v1beta1
-kind: Deployment
+apiVersion: apps/v1alpha1
+kind: PetSet
 metadata:
   labels:
     db: rethinkdb
-  name: rethinkdb-replica-2
+  name: rethinkdb
 spec:
-  replicas: 1
+  replicas: 3
+  # Must match RETHINKDB-CLUSTER env and service name.
+  serviceName: rethinkdb
   template:
     metadata:
+      annotations:
+        pod.alpha.kubernetes.io/initialized: "true"
       labels:
         db: rethinkdb
-        role: replica
-        instance: two
     spec:
       containers:
       - image: paralin/rethinkdb-k8s:2.3.4
@@ -52,9 +54,25 @@ spec:
             memory: 256Mi
         volumeMounts:
         - mountPath: /data
-          name: storage
-      volumes:
-      - gcePersistentDisk:
-          fsType: ext4
-          pdName: rethinkdb-storage-2
-        name: storage
+          name: rethinkdb-storage
+        readinessProbe:
+          exec:
+            command:
+            - /ready-probe.sh
+          failureThreshold: 3
+          initialDelaySeconds: 15
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 5
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+  volumeClaimTemplates:
+  - metadata:
+      creationTimestamp: null
+      name: rethinkdb-storage
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: 10Gi

@@ -16,14 +16,15 @@
 
 set -o pipefail
 
+POD_NAMESPACE=${POD_NAMESPACE:-default}
+RETHINK_CLUSTER=${RETHINK_CLUSTER:-"rethinkdb"}
+
 echo "Using additional CLI flags: ${@}"
 echo "Pod IP: ${POD_IP}"
-POD_NAMESPACE=${POD_NAMESPACE:-default}
 echo "Pod namespace: ${POD_NAMESPACE}"
-RETHINK_CLUSTER=${RETHINK_CLUSTER:-"rethinkdb"}
 echo "Using service name: ${RETHINK_CLUSTER}"
-echo "Checking for other nodes..."
 
+echo "Checking for other nodes..."
 if [[ -n "${KUBERNETES_SERVICE_HOST}" && -z "${USE_SERVICE_LOOKUP}" ]]; then
   echo "Using endpoints to lookup other nodes..."
   URL="https://${KUBERNETES_SERVICE_HOST}:${KUBERNETES_SERVICE_PORT}/api/v1/namespaces/${POD_NAMESPACE}/endpoints/${RETHINK_CLUSTER}"

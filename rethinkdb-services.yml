@@ -8,7 +8,7 @@ spec:
   type: LoadBalancer
   ports:
    - port: 8080
-     targetPort: admin-port
+     targetPort: admin
   selector:
     db: rethinkdb
     role: admin
@@ -18,11 +18,12 @@ kind: Service
 metadata:
   labels:
     db: rethinkdb
-  name: rethinkdb-cluster
+  name: rethinkdb
 spec:
+  clusterIp: None
   ports:
     - port: 29015
-      targetPort: cluster-port
+      targetPort: cluster
   selector:
     db: rethinkdb
     role: replica
@@ -32,11 +33,11 @@ kind: Service
 metadata:
   labels:
     db: rethinkdb
-  name: rethinkdb-driver
+  name: rethinkdb-proxy
 spec:
   ports:
     - port: 28015
-      targetPort: driver-port
+      targetPort: driver
   selector:
     db: rethinkdb
     role: proxy

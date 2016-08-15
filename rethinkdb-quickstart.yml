@@ -8,7 +8,7 @@ spec:
   type: LoadBalancer
   ports:
    - port: 8080
-     targetPort: admin-port
+     targetPort: admin
   selector:
     db: rethinkdb
     role: admin
@@ -18,11 +18,12 @@ kind: Service
 metadata:
   labels:
     db: rethinkdb
-  name: rethinkdb-cluster
+  name: rethinkdb
 spec:
+  clusterIp: None
   ports:
     - port: 29015
-      targetPort: cluster-port
+      targetPort: cluster
   selector:
     db: rethinkdb
     role: replica
@@ -32,15 +33,14 @@ kind: Service
 metadata:
   labels:
     db: rethinkdb
-  name: rethinkdb-driver
+  name: rethinkdb-proxy
 spec:
-  type: LoadBalancer
   ports:
     - port: 28015
-      targetPort: driver-port
+      targetPort: driver
   selector:
     db: rethinkdb
-    role: replica
+    role: proxy
 ---
 apiVersion: extensions/v1beta1
 kind: Deployment
@@ -49,6 +49,7 @@ metadata:
     db: rethinkdb
   name: rethinkdb-replica
 spec:
+  replicas: 1
   template:
     metadata:
       labels:
@@ -56,27 +57,35 @@ spec:
         role: replica
     spec:
       containers:
-      - image: rosskukulinski/rethinkdb-kubernetes:2.3.4
-        imagePullPolicy: Always
-        name: rethinkdb
-        command:
-          - "/usr/bin/run.sh"
+      - image: paralin/rethinkdb-k8s:2.3.4
+        args:
           - "--cache-size"
           - "100"
+        imagePullPolicy: Always
+        name: rethinkdb
         env:
         - name: POD_NAMESPACE
           valueFrom:
             fieldRef:
               fieldPath: metadata.namespace
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: POD_IP
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: status.podIP
         - name: RETHINK_CLUSTER
-          value: rethinkdb-cluster
+          value: rethinkdb
         ports:
         - containerPort: 8080
-          name: admin-port
+          name: admin
         - containerPort: 28015
-          name: driver-port
+          name: driver
         - containerPort: 29015
-          name: cluster-port
+          name: cluster
         resources:
           limits:
             cpu: 100m
@@ -85,31 +94,25 @@ spec:
             cpu: 100m
             memory: 256Mi
         volumeMounts:
-        - mountPath: /data/rethinkdb_data
-          name: rethinkdb-storage
-        livenessProbe:
-          httpGet:
-            path: /
-            port: 8080
-          initialDelaySeconds: 10
-          timeoutSeconds: 5
-        readinessProbe:
-          httpGet:
-            path: /
-            port: 8080
-          initialDelaySeconds: 10
-          timeoutSeconds: 5
+        - mountPath: /data
+          name: storage
       volumes:
-      - name: rethinkdb-storage
-        emptyDir: {}
+      - gcePersistentDisk:
+          fsType: ext4
+          pdName: rethinkdb-storage
+        name: storage
 ---
-apiVersion: extensions/v1beta1
-kind: Deployment
+apiVersion: v1
+kind: ReplicationController
 metadata:
   labels:
     db: rethinkdb
   name: rethinkdb-admin
 spec:
+  replicas: 1
+  selector:
+    db: rethinkdb
+    role: admin
   template:
     metadata:
       labels:
@@ -117,7 +120,7 @@ spec:
         role: admin
     spec:
       containers:
-      - image: rosskukulinski/rethinkdb-kubernetes:2.3.4
+      - image: paralin/rethinkdb-k8s:2.3.4
         imagePullPolicy: Always
         name: rethinkdb
         env:
@@ -127,30 +130,27 @@ spec:
           valueFrom:
             fieldRef:
               fieldPath: metadata.namespace
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: POD_IP
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: status.podIP
         - name: RETHINK_CLUSTER
-          value: rethinkdb-cluster
+          value: rethinkdb
         ports:
         - containerPort: 8080
-          name: admin-port
+          name: admin
         - containerPort: 28015
-          name: driver-port
+          name: driver
         - containerPort: 29015
-          name: cluster-port
+          name: cluster
         volumeMounts:
         - mountPath: /data/rethinkdb_data
-          name: rethinkdb-storage
-        livenessProbe:
-          httpGet:
-            path: /
-            port: 8080
-          initialDelaySeconds: 10
-          timeoutSeconds: 5
-        readinessProbe:
-          httpGet:
-            path: /
-            port: 8080
-          initialDelaySeconds: 10
-          timeoutSeconds: 5
+          name: storage
       volumes:
-      - name: rethinkdb-storage
+      - name: storage
         emptyDir: {}
