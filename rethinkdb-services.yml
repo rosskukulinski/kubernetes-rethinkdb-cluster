@@ -20,10 +20,9 @@ metadata:
     db: rethinkdb
   name: rethinkdb
 spec:
-  clusterIp: None
+  clusterIP: None
   ports:
-    - port: 29015
-      targetPort: cluster
+  - port: 29015
   selector:
     db: rethinkdb
     role: replica
