@@ -71,10 +71,21 @@ else
   fi
 fi
 
-set -x
-exec rethinkdb \
-  --server-name ${SERVER_NAME} \
-  --canonical-address ${POD_IP} \
-  --bind all \
-  ${JOIN_ENDPOINTS} \
-  ${@}
+if [[ -n "${PROXY}" ]]; then
+  echo "Starting in proxy mode"
+  set -x
+  exec rethinkdb \
+    proxy \
+    --canonical-address ${POD_IP} \
+    --bind all \
+    ${JOIN_ENDPOINTS} \
+    ${@}
+else
+  set -x
+  exec rethinkdb \
+    --server-name ${SERVER_NAME} \
+    --canonical-address ${POD_IP} \
+    --bind all \
+    ${JOIN_ENDPOINTS} \
+    ${@}
+fi
