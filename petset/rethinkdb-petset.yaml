@@ -1,16 +1,20 @@
-apiVersion: extensions/v1beta1
-kind: Deployment
+apiVersion: apps/v1alpha1
+kind: PetSet
 metadata:
   labels:
     db: rethinkdb
-  name: rethinkdb-admin
+  name: rethinkdb
 spec:
-  replicas: 1
+  replicas: 3
+  # Must match RETHINKDB-CLUSTER env and service name.
+  serviceName: rethinkdb
   template:
     metadata:
+      annotations:
+        pod.alpha.kubernetes.io/initialized: "true"
       labels:
         db: rethinkdb
-        role: admin
+        role: replica
     spec:
       containers:
       - image: rosskukulinski/rethinkdb-kubernetes:2.3.4
@@ -20,8 +24,6 @@ spec:
         imagePullPolicy: Always
         name: rethinkdb
         env:
-        - name: PROXY
-          value: "true"
         - name: POD_NAMESPACE
           valueFrom:
             fieldRef:
@@ -37,6 +39,8 @@ spec:
               fieldPath: status.podIP
         - name: RETHINK_CLUSTER
           value: rethinkdb
+        - name: USE_SERVICE_LOOKUP
+          value: "yes"
         ports:
         - containerPort: 8080
           name: admin
@@ -44,6 +48,25 @@ spec:
           name: driver
         - containerPort: 29015
           name: cluster
+        resources:
+          limits:
+            cpu: 100m
+            memory: 256Mi
+          requests:
+            cpu: 100m
+            memory: 256Mi
+        volumeMounts:
+        - mountPath: /data
+          name: rethinkdb-storage
+        readinessProbe:
+          exec:
+            command:
+            - /ready-probe.sh
+          failureThreshold: 3
+          initialDelaySeconds: 15
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 5
         livenessProbe:
           exec:
             command:
@@ -53,25 +76,15 @@ spec:
           periodSeconds: 10
           successThreshold: 1
           timeoutSeconds: 5
-        readinessProbe:
-          exec:
-            command:
-              - /ready-probe.sh
-          failureThreshold: 3
-          initialDelaySeconds: 15
-          periodSeconds: 10
-          successThreshold: 1
-          timeoutSeconds: 5
-        resources:
-          limits:
-            cpu: 100m
-            memory: 256Mi
-          requests:
-            cpu: 100m
-            memory: 256Mi
-        volumeMounts:
-        - mountPath: /data/rethinkdb_data
-          name: storage
-      volumes:
-      - name: storage
-        emptyDir: {}
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+  volumeClaimTemplates:
+  - metadata:
+      creationTimestamp: null
+      name: rethinkdb-storage
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: 10Gi

@@ -20,9 +20,9 @@ metadata:
     db: rethinkdb
   name: rethinkdb
 spec:
+  clusterIP: None
   ports:
   - port: 29015
-    targetPort: cluster
   selector:
     db: rethinkdb
     role: replica
@@ -34,7 +34,6 @@ metadata:
     db: rethinkdb
   name: rethinkdb-proxy
 spec:
-  type: LoadBalancer
   ports:
     - port: 28015
       targetPort: driver

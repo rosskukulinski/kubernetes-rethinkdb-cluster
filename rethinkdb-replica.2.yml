@@ -6,10 +6,6 @@ metadata:
   name: rethinkdb-replica-2
 spec:
   replicas: 1
-  selector:
-    db: rethinkdb
-    role: replica
-    instance: two
   template:
     metadata:
       labels:
@@ -19,12 +15,9 @@ spec:
     spec:
       containers:
       - image: rosskukulinski/rethinkdb-kubernetes:2.3.4
-        command:
-          - "/usr/bin/run.sh"
-          - "--server-name"
-          - "replica_2"
+        args:
           - "--cache-size"
-          - "256"
+          - "100"
         imagePullPolicy: Always
         name: rethinkdb
         env:
@@ -32,15 +25,42 @@ spec:
           valueFrom:
             fieldRef:
               fieldPath: metadata.namespace
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: POD_IP
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: status.podIP
         - name: RETHINK_CLUSTER
-          value: rethinkdb-cluster
+          value: rethinkdb
         ports:
         - containerPort: 8080
-          name: admin-port
+          name: admin
         - containerPort: 28015
-          name: driver-port
+          name: driver
         - containerPort: 29015
-          name: cluster-port
+          name: cluster
+        livenessProbe:
+          exec:
+            command:
+              - /ready-probe.sh
+          failureThreshold: 3
+          initialDelaySeconds: 15
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 5
+        readinessProbe:
+          exec:
+            command:
+              - /ready-probe.sh
+          failureThreshold: 3
+          initialDelaySeconds: 15
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 5
         resources:
           limits:
             cpu: 100m
@@ -50,9 +70,9 @@ spec:
             memory: 256Mi
         volumeMounts:
         - mountPath: /data
-          name: rethinkdb-storage
+          name: storage
       volumes:
       - gcePersistentDisk:
           fsType: ext4
           pdName: rethinkdb-storage-2
-        name: rethinkdb-storage
+        name: storage

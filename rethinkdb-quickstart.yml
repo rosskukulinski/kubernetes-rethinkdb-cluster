@@ -8,7 +8,7 @@ spec:
   type: LoadBalancer
   ports:
    - port: 8080
-     targetPort: admin-port
+     targetPort: admin
   selector:
     db: rethinkdb
     role: admin
@@ -18,11 +18,11 @@ kind: Service
 metadata:
   labels:
     db: rethinkdb
-  name: rethinkdb-cluster
+  name: rethinkdb
 spec:
   ports:
     - port: 29015
-      targetPort: cluster-port
+      targetPort: cluster
   selector:
     db: rethinkdb
     role: replica
@@ -32,15 +32,15 @@ kind: Service
 metadata:
   labels:
     db: rethinkdb
-  name: rethinkdb-driver
+  name: rethinkdb-proxy
 spec:
   type: LoadBalancer
   ports:
     - port: 28015
-      targetPort: driver-port
+      targetPort: driver
   selector:
     db: rethinkdb
-    role: replica
+    role: proxy
 ---
 apiVersion: extensions/v1beta1
 kind: Deployment
@@ -57,26 +57,34 @@ spec:
     spec:
       containers:
       - image: rosskukulinski/rethinkdb-kubernetes:2.3.4
-        imagePullPolicy: Always
-        name: rethinkdb
-        command:
-          - "/usr/bin/run.sh"
+        args:
           - "--cache-size"
           - "100"
+        imagePullPolicy: Always
+        name: rethinkdb
         env:
         - name: POD_NAMESPACE
           valueFrom:
             fieldRef:
               fieldPath: metadata.namespace
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: POD_IP
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: status.podIP
         - name: RETHINK_CLUSTER
-          value: rethinkdb-cluster
+          value: rethinkdb
         ports:
         - containerPort: 8080
-          name: admin-port
+          name: admin
         - containerPort: 28015
-          name: driver-port
+          name: driver
         - containerPort: 29015
-          name: cluster-port
+          name: cluster
         resources:
           limits:
             cpu: 100m
@@ -88,16 +96,22 @@ spec:
         - mountPath: /data/rethinkdb_data
           name: rethinkdb-storage
         livenessProbe:
-          httpGet:
-            path: /
-            port: 8080
-          initialDelaySeconds: 10
+          exec:
+            command:
+              - /ready-probe.sh
+          failureThreshold: 3
+          initialDelaySeconds: 15
+          periodSeconds: 10
+          successThreshold: 1
           timeoutSeconds: 5
         readinessProbe:
-          httpGet:
-            path: /
-            port: 8080
-          initialDelaySeconds: 10
+          exec:
+            command:
+              - /ready-probe.sh
+          failureThreshold: 3
+          initialDelaySeconds: 15
+          periodSeconds: 10
+          successThreshold: 1
           timeoutSeconds: 5
       volumes:
       - name: rethinkdb-storage
@@ -127,30 +141,112 @@ spec:
           valueFrom:
             fieldRef:
               fieldPath: metadata.namespace
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: POD_IP
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: status.podIP
         - name: RETHINK_CLUSTER
-          value: rethinkdb-cluster
+          value: rethinkdb
         ports:
         - containerPort: 8080
-          name: admin-port
+          name: admin
         - containerPort: 28015
-          name: driver-port
+          name: driver
         - containerPort: 29015
-          name: cluster-port
-        volumeMounts:
-        - mountPath: /data/rethinkdb_data
-          name: rethinkdb-storage
+          name: cluster
         livenessProbe:
-          httpGet:
-            path: /
-            port: 8080
-          initialDelaySeconds: 10
+          exec:
+            command:
+              - /ready-probe.sh
+          failureThreshold: 3
+          initialDelaySeconds: 15
+          periodSeconds: 10
+          successThreshold: 1
           timeoutSeconds: 5
         readinessProbe:
-          httpGet:
-            path: /
-            port: 8080
-          initialDelaySeconds: 10
+          exec:
+            command:
+              - /ready-probe.sh
+          failureThreshold: 3
+          initialDelaySeconds: 15
+          periodSeconds: 10
+          successThreshold: 1
           timeoutSeconds: 5
+        volumeMounts:
+        - mountPath: /data/rethinkdb_data
+          name: storage
       volumes:
-      - name: rethinkdb-storage
+      - name: storage
+        emptyDir: {}
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    db: rethinkdb
+  name: rethinkdb-proxy
+spec:
+  template:
+    metadata:
+      labels:
+        db: rethinkdb
+        role: proxy
+    spec:
+      containers:
+      - image: rosskukulinski/rethinkdb-kubernetes:2.3.4
+        imagePullPolicy: Always
+        name: rethinkdb
+        env:
+        - name: PROXY
+          value: "true"
+        - name: POD_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: POD_IP
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: status.podIP
+        - name: RETHINK_CLUSTER
+          value: rethinkdb
+        ports:
+        - containerPort: 8080
+          name: admin
+        - containerPort: 28015
+          name: driver
+        - containerPort: 29015
+          name: cluster
+        livenessProbe:
+          exec:
+            command:
+              - /ready-probe.sh
+          failureThreshold: 3
+          initialDelaySeconds: 15
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 5
+        readinessProbe:
+          exec:
+            command:
+              - /ready-probe.sh
+          failureThreshold: 3
+          initialDelaySeconds: 15
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 5
+        volumeMounts:
+        - mountPath: /data/rethinkdb_data
+          name: storage
+      volumes:
+      - name: storage
         emptyDir: {}
