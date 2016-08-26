@@ -20,7 +20,6 @@ metadata:
     db: rethinkdb
   name: rethinkdb
 spec:
-  clusterIp: None
   ports:
     - port: 29015
       targetPort: cluster
@@ -35,6 +34,7 @@ metadata:
     db: rethinkdb
   name: rethinkdb-proxy
 spec:
+  type: LoadBalancer
   ports:
     - port: 28015
       targetPort: driver
@@ -49,7 +49,6 @@ metadata:
     db: rethinkdb
   name: rethinkdb-replica
 spec:
-  replicas: 1
   template:
     metadata:
       labels:
@@ -57,7 +56,7 @@ spec:
         role: replica
     spec:
       containers:
-      - image: paralin/rethinkdb-k8s:2.3.4
+      - image: rosskukulinski/rethinkdb-kubernetes:2.3.4
         args:
           - "--cache-size"
           - "100"
@@ -94,25 +93,37 @@ spec:
             cpu: 100m
             memory: 256Mi
         volumeMounts:
-        - mountPath: /data
-          name: storage
+        - mountPath: /data/rethinkdb_data
+          name: rethinkdb-storage
+        livenessProbe:
+          exec:
+            command:
+              - /ready-probe.sh
+          failureThreshold: 3
+          initialDelaySeconds: 15
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 5
+        readinessProbe:
+          exec:
+            command:
+              - /ready-probe.sh
+          failureThreshold: 3
+          initialDelaySeconds: 15
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 5
       volumes:
-      - gcePersistentDisk:
-          fsType: ext4
-          pdName: rethinkdb-storage
-        name: storage
+      - name: rethinkdb-storage
+        emptyDir: {}
 ---
-apiVersion: v1
-kind: ReplicationController
+apiVersion: extensions/v1beta1
+kind: Deployment
 metadata:
   labels:
     db: rethinkdb
   name: rethinkdb-admin
 spec:
-  replicas: 1
-  selector:
-    db: rethinkdb
-    role: admin
   template:
     metadata:
       labels:
@@ -120,7 +131,7 @@ spec:
         role: admin
     spec:
       containers:
-      - image: paralin/rethinkdb-k8s:2.3.4
+      - image: rosskukulinski/rethinkdb-kubernetes:2.3.4
         imagePullPolicy: Always
         name: rethinkdb
         env:
@@ -148,6 +159,91 @@ spec:
           name: driver
         - containerPort: 29015
           name: cluster
+        livenessProbe:
+          exec:
+            command:
+              - /ready-probe.sh
+          failureThreshold: 3
+          initialDelaySeconds: 15
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 5
+        readinessProbe:
+          exec:
+            command:
+              - /ready-probe.sh
+          failureThreshold: 3
+          initialDelaySeconds: 15
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 5
+        volumeMounts:
+        - mountPath: /data/rethinkdb_data
+          name: storage
+      volumes:
+      - name: storage
+        emptyDir: {}
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    db: rethinkdb
+  name: rethinkdb-proxy
+spec:
+  template:
+    metadata:
+      labels:
+        db: rethinkdb
+        role: proxy
+    spec:
+      containers:
+      - image: rosskukulinski/rethinkdb-kubernetes:2.3.4
+        imagePullPolicy: Always
+        name: rethinkdb
+        env:
+        - name: PROXY
+          value: "true"
+        - name: POD_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: POD_IP
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: status.podIP
+        - name: RETHINK_CLUSTER
+          value: rethinkdb
+        ports:
+        - containerPort: 8080
+          name: admin
+        - containerPort: 28015
+          name: driver
+        - containerPort: 29015
+          name: cluster
+        livenessProbe:
+          exec:
+            command:
+              - /ready-probe.sh
+          failureThreshold: 3
+          initialDelaySeconds: 15
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 5
+        readinessProbe:
+          exec:
+            command:
+              - /ready-probe.sh
+          failureThreshold: 3
+          initialDelaySeconds: 15
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 5
         volumeMounts:
         - mountPath: /data/rethinkdb_data
           name: storage
