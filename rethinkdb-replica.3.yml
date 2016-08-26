@@ -14,7 +14,7 @@ spec:
         instance: three
     spec:
       containers:
-      - image: paralin/rethinkdb-k8s:2.3.4
+      - image: rosskukulinski/rethinkdb-kubernetes:2.3.4
         args:
           - "--cache-size"
           - "100"
@@ -43,6 +43,24 @@ spec:
           name: driver
         - containerPort: 29015
           name: cluster
+        livenessProbe:
+          exec:
+            command:
+              - /ready-probe.sh
+          failureThreshold: 3
+          initialDelaySeconds: 15
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 5
+        readinessProbe:
+          exec:
+            command:
+              - /ready-probe.sh
+          failureThreshold: 3
+          initialDelaySeconds: 15
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 5
         resources:
           limits:
             cpu: 100m
