@@ -14,7 +14,7 @@ spec:
         instance: one
     spec:
       containers:
-      - image: rosskukulinski/rethinkdb-kubernetes:2.3.4
+      - image: rosskukulinski/rethinkdb-kubernetes:2.3.5
         args:
           - "--cache-size"
           - "100"
