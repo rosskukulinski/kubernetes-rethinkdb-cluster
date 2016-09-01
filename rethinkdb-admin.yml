@@ -14,9 +14,6 @@ spec:
     spec:
       containers:
       - image: rosskukulinski/rethinkdb-kubernetes:2.3.4
-        args:
-          - "--cache-size"
-          - "100"
         imagePullPolicy: Always
         name: rethinkdb
         env:
