@@ -26,11 +26,11 @@ https://hub.docker.com/r/rosskukulinski/rethinkdb-kubernetes
 It's important to note that the default admin interface IS exposed via public LoadBalancer.  This is for demonstration purposes only.  I would recommend changing the admin service to ```type: ClusterIP``` and use a TLS & password protected proxy (like nginx) to publicly expose the admin interface.
 
 ## New to Kubernetes?
-1) Create a project on https://console.cloud.google.com
-2) Set `gcloud` to your project `gcloud config set <project-name>`
-3) Create a cluster via the Console: Compute > Container Engine > Container Clusters > New container cluster. 
+1. Create a project on https://console.cloud.google.com
+2. Set `gcloud` to your project `gcloud config set <project-name>`
+3. Create a cluster via the Console: Compute > Container Engine > Container Clusters > New container cluster. 
 Leaving all other options default - You should get a Kubernetes cluster with three nodes, ready to receive your container image.
-4) Set `gcloud` to point to your container - `gcloud container clusters get-credentials --zone <cluster-zone> <cluster-name>`
+4. Set `gcloud` to point to your container - `gcloud container clusters get-credentials --zone <cluster-zone> <cluster-name>`
 
 
 
