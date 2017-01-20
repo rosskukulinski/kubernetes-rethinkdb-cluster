@@ -98,7 +98,7 @@ spec:
         livenessProbe:
           exec:
             command:
-              - /ready-probe.sh
+              - /probe
           failureThreshold: 3
           initialDelaySeconds: 15
           periodSeconds: 10
@@ -107,7 +107,7 @@ spec:
         readinessProbe:
           exec:
             command:
-              - /ready-probe.sh
+              - /probe
           failureThreshold: 3
           initialDelaySeconds: 15
           periodSeconds: 10
@@ -162,7 +162,7 @@ spec:
         livenessProbe:
           exec:
             command:
-              - /ready-probe.sh
+              - /probe
           failureThreshold: 3
           initialDelaySeconds: 15
           periodSeconds: 10
@@ -171,7 +171,7 @@ spec:
         readinessProbe:
           exec:
             command:
-              - /ready-probe.sh
+              - /probe
           failureThreshold: 3
           initialDelaySeconds: 15
           periodSeconds: 10
@@ -229,7 +229,7 @@ spec:
         livenessProbe:
           exec:
             command:
-              - /ready-probe.sh
+              - /probe
           failureThreshold: 3
           initialDelaySeconds: 15
           periodSeconds: 10
@@ -238,7 +238,7 @@ spec:
         readinessProbe:
           exec:
             command:
-              - /ready-probe.sh
+              - /probe
           failureThreshold: 3
           initialDelaySeconds: 15
           periodSeconds: 10
