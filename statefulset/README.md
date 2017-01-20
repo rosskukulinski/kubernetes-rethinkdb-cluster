@@ -10,17 +10,9 @@ GKE Instructions
 
 AWS Instructions
 ================
+It appears that the PersistentVolumeClaims create the EBS automatically.
 
 ```bash
-# The helper script will create the volume and generate the 
-# rethinkdb-aws-pv.yml file
-╰─$ AWS_REGION=us-west-1 AWS_ZONE=us-west-1a VOL_SIZE=5 ./rethinkdb-aws-pv.sh
-EBS Volume ID: vol-0f88c0bfa22XXXXXX
-
-# Create a PersistentVolume.
-╰─$ kubectl create -f rethinkdb-aws-pv.yml 
-persistentvolume "rethinkdb" created
-
 # Start the service. 
 ╰─$ kubectl create -f rethinkdb-service.yml 
 service "rethinkdb" created
@@ -36,26 +28,25 @@ deployment "rethinkdb-admin" created
 
 # Poke around to verify...
 ╰─$ kubectl get pv
-NAME                                       CAPACITY   ACCESSMODES   RECLAIMPOLICY   STATUS      CLAIM                      REASON    AGE
-pvc-15bf9c39-dea6-11e6-ac2e-02b95063087e   10Gi       RWO           Delete          Bound       default/data-rethinkdb-0             13m
-pvc-15c7494c-dea6-11e6-ac2e-02b95063087e   10Gi       RWO           Delete          Bound       default/data-rethinkdb-1             13m
-pvc-15cbe662-dea6-11e6-ac2e-02b95063087e   10Gi       RWO           Delete          Bound       default/data-rethinkdb-2             13m
-rethinkdb                                  5Gi        RWO           Retain          Available                                        18m
-
+NAME                                       CAPACITY   ACCESSMODES   RECLAIMPOLICY   STATUS    CLAIM                      REASON    AGE
+pvc-a3a8ebf7-df4e-11e6-ac2e-02b95063087e   10Gi       RWO           Delete          Bound     default/data-rethinkdb-0             5m
+pvc-a3b11fc6-df4e-11e6-ac2e-02b95063087e   10Gi       RWO           Delete          Bound     default/data-rethinkdb-1             5m
+pvc-a3b6feea-df4e-11e6-ac2e-02b95063087e   10Gi       RWO           Delete          Bound     default/data-rethinkdb-2             5m
+╭
 ╰─$ kubectl get statefulset,po,svc
 NAME                     DESIRED   CURRENT   AGE
-statefulsets/rethinkdb   3         3         15m
+statefulsets/rethinkdb   3         3         5m
 
 NAME                                  READY     STATUS    RESTARTS   AGE
-po/rethinkdb-0                        1/1       Running   0          15m
-po/rethinkdb-1                        1/1       Running   0          14m
-po/rethinkdb-2                        1/1       Running   0          13m
-po/rethinkdb-admin-1722877930-m4sfc   1/1       Running   0          13m
+po/rethinkdb-0                        1/1       Running   0          5m
+po/rethinkdb-1                        1/1       Running   0          4m
+po/rethinkdb-2                        1/1       Running   0          4m
+po/rethinkdb-admin-1722877930-wr6km   1/1       Running   3          5m
 
 NAME                  CLUSTER-IP    EXTERNAL-IP        PORT(S)          AGE
-svc/rethinkdb         None          <none>             29015/TCP        18m
-svc/rethinkdb-admin   10.0.10.155   a40e03795dea6...   8080:31430/TCP   13m
-
+svc/rethinkdb         None          <none>             29015/TCP        5m
+svc/rethinkdb-admin   10.0.147.93   aa386db9cdf4e...   8080:30993/TCP   5m
+╭
 ```
 
 Warning! 
