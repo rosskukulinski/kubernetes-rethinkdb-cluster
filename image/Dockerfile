@@ -4,13 +4,15 @@ MAINTAINER Ross Kukulinski <ross@kukulinski.com>
 
 RUN apt-get update && \
     apt-get install -yq curl && \
-    rm -rf /var/cache/apt/* && rm -rf /var/lib/apt/lists/* && \
-    curl -L http://stedolan.github.io/jq/download/linux64/jq > /usr/bin/jq && \
-    chmod u+x /usr/bin/jq && \
-    curl -L https://github.com/Yelp/dumb-init/releases/download/v1.1.3/dumb-init_1.1.3_amd64.deb > dumb-init.deb && \
-    dpkg -i dumb-init.deb && rm dumb-init.deb
+    rm -rf /var/cache/apt/* && rm -rf /var/lib/apt/lists/*
 
-COPY ./run.sh ./ready-probe.sh /
-RUN chmod u+x /run.sh /ready-probe.sh
+ADD http://stedolan.github.io/jq/download/linux64/jq /usr/bin/jq
+RUN chmod +x /usr/bin/jq
 
-ENTRYPOINT ["/usr/bin/dumb-init", "/run.sh"]
+ADD https://github.com/Yelp/dumb-init/releases/download/v1.2.0/dumb-init_1.2.0_amd64 /usr/local/bin/dumb-init
+RUN chmod +x /usr/local/bin/dumb-init
+
+COPY ./run.sh ./probe ./ready-probe.sh /
+RUN chmod u+x /run.sh /probe /ready-probe.sh
+
+ENTRYPOINT ["/usr/local/bin/dumb-init", "/run.sh"]

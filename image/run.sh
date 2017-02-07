@@ -17,7 +17,9 @@
 set -o pipefail
 
 POD_NAMESPACE=${POD_NAMESPACE:-default}
+POD_IP=${POD_IP:-127.0.0.1}
 RETHINK_CLUSTER=${RETHINK_CLUSTER:-"rethinkdb"}
+POD_NAME=${POD_NAME:-"NO_POD_NAME"}
 
 # Transform - to _ to comply with requirements
 SERVER_NAME=$(echo ${POD_NAME} | sed 's/-/_/g')
