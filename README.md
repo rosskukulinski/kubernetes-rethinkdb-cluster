@@ -20,7 +20,7 @@ of these settings can be tuned for your specific needs.
 ## Background
 This is based on the original work in [github.com/kubernetes/kubernetes](https://github.com/kubernetes/kubernetes/tree/master/examples/rethinkdb), but has been adapted to utilize newer versions of RethinkDB (2.3+) as well as supporting proxies.
 
-Docker Automated Build: rosskukulinski/rethinkdb-kubernetes:2.3.5
+Docker Automated Build: rosskukulinski/rethinkdb-kubernetes:2.3.6.rc1
 https://hub.docker.com/r/rosskukulinski/rethinkdb-kubernetes
 
 It's important to note that the default admin interface IS exposed via public LoadBalancer.  This is for demonstration purposes only.  I would recommend changing the admin service to ```type: ClusterIP``` and use a TLS & password protected proxy (like nginx) to publicly expose the admin interface.
@@ -28,7 +28,7 @@ It's important to note that the default admin interface IS exposed via public Lo
 ## New to Kubernetes?
 1. Create a project on https://console.cloud.google.com
 2. Set `gcloud` to your project `gcloud config set <project-name>`
-3. Create a cluster via the Console: Compute > Container Engine > Container Clusters > New container cluster. 
+3. Create a cluster via the Console: Compute > Container Engine > Container Clusters > New container cluster.
 Leaving all other options default - You should get a Kubernetes cluster with three nodes, ready to receive your container image.
 4. Set `gcloud` to point to your container - `gcloud container clusters get-credentials --zone <cluster-zone> <cluster-name>`
 

@@ -1,0 +1,32 @@
+FROM debian:jessie
+
+MAINTAINER Ross Kukulinski <ross@kukulinski.com>
+
+# Define mountable directories.
+VOLUME ["/data"]
+
+# Define working directory.
+WORKDIR /data
+
+EXPOSE 8080 28015 29015
+
+RUN apt-get update && \
+    apt-get install -yq curl python-pip libcurl3 libprotobuf9 && \
+    rm -rf /var/cache/apt/* && rm -rf /var/lib/apt/lists/*
+
+RUN curl http://thanos.atnnn.com/build/3751/download/2/rethinkdb_2.3.5+24+g80e5fa+dirty~0jessie_amd64.deb > /rethinkdb_2.3.5+24+g80e5fa+dirty~0jessie_amd64.deb && \
+    dpkg -i /rethinkdb_2.3.5+24+g80e5fa+dirty~0jessie_amd64.deb && \
+    rm -rf /rethinkdb_2.3.5+24+g80e5fa+dirty~0jessie_amd64.deb
+
+RUN pip install rethinkdb
+
+ADD http://stedolan.github.io/jq/download/linux64/jq /usr/bin/jq
+RUN chmod +x /usr/bin/jq
+
+ADD https://github.com/Yelp/dumb-init/releases/download/v1.2.0/dumb-init_1.2.0_amd64 /usr/local/bin/dumb-init
+RUN chmod +x /usr/local/bin/dumb-init
+
+COPY ./run.sh ./probe ./ready-probe.sh /
+RUN chmod u+x /run.sh /probe /ready-probe.sh
+
+ENTRYPOINT ["/usr/local/bin/dumb-init", "/run.sh"]
