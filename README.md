@@ -2,6 +2,8 @@
 
 MIT Licensed by Ross Kukulinski [@RossKukulinski](https://twitter.com/rosskukulinski)
 
+Docker image can be found [here](https://github.com/rosskukulinski/rethinkdb-kubernetes).
+
 ## Overview
 
 This repository contains Kubernetes configurations to easily deploy RethinkDB.
@@ -19,9 +21,6 @@ of these settings can be tuned for your specific needs.
 
 ## Background
 This is based on the original work in [github.com/kubernetes/kubernetes](https://github.com/kubernetes/kubernetes/tree/master/examples/rethinkdb), but has been adapted to utilize newer versions of RethinkDB (2.3+) as well as supporting proxies.
-
-Docker Automated Build: rosskukulinski/rethinkdb-kubernetes:2.3.5
-https://hub.docker.com/r/rosskukulinski/rethinkdb-kubernetes
 
 It's important to note that the default admin interface IS exposed via public LoadBalancer.  This is for demonstration purposes only.  I would recommend changing the admin service to ```type: ClusterIP``` and use a TLS & password protected proxy (like nginx) to publicly expose the admin interface.
 
