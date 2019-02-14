@@ -130,6 +130,7 @@ spec:
         db: rethinkdb
         role: admin
     spec:
+      serviceAccount: rethinkdb
       containers:
       - image: rosskukulinski/rethinkdb-kubernetes:2.3.5
         imagePullPolicy: Always
@@ -197,6 +198,7 @@ spec:
         db: rethinkdb
         role: proxy
     spec:
+      serviceAccount: rethinkdb
       containers:
       - image: rosskukulinski/rethinkdb-kubernetes:2.3.5
         imagePullPolicy: Always

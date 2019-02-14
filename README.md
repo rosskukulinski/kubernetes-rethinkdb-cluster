@@ -38,7 +38,8 @@ Leaving all other options default - You should get a Kubernetes cluster with thr
 Launch Services and Deployments
 
 ```
-kubectl create -f rethinkdb-quickstart.yml
+kubectl apply -f rethinkdb-rbac.yaml
+kubectl apply -f rethinkdb-quickstart.yml
 ```
 
 Once Rethinkdb pods are running, access the Admin service
