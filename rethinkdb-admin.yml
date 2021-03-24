@@ -32,6 +32,8 @@ spec:
             fieldRef:
               apiVersion: v1
               fieldPath: status.podIP
+        - name: USE_SERVICE_LOOKUP
+          value: "true"
         - name: RETHINK_CLUSTER
           value: rethinkdb
         ports:
